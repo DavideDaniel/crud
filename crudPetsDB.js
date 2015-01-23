@@ -13,9 +13,6 @@ var value = {
 
 db.put( value.name, value );
 
-// db.get( "smokey", function ( value ) {
-// console.log( value.name ) + " = " + console.log( value.type );;
-// } )
 
 var file = "all_pets.JSON"
 
@@ -26,7 +23,7 @@ var all_pets = {
 };
 
 var pets = JSON.stringify( all_pets.pets )
-// console.log( pets );
+
 
 var none = {
 	status: "A pet by that name does not exist."
@@ -42,19 +39,23 @@ var Pet = function ( name, type ) {
 }
 
 app.get( '/', function ( req, res ) {
-	db.createReadStream()
-		.on( 'data', function ( data ) {
-			console.log( data.key, '=', data.value )
+	db.createReadStream(function(stream){
+		stream.on( 'data', function ( data ) {
+			console.log( data.pets )
+			
+			console.log(data.value)
+			console.log( data.pets[0] )
 		} )
-		.on( 'error', function ( err ) {
+		stream.on( 'error', function ( err ) {
 			console.log( 'Oh my!', err )
 		} )
-		.on( 'close', function () {
+		stream.on( 'close', function () {
 			console.log( 'Stream closed' )
 		} )
-		.on( 'end', function () {
+		stream.on( 'end', function () {
 			console.log( 'Stream closed' )
 		} );
+	})
 
 	res.json( {
 		welcome: "Welcome to the petDB "
@@ -62,6 +63,20 @@ app.get( '/', function ( req, res ) {
 } );
 
 app.get( '/create/:pet_name/:pet_type', function ( req, res ) {
+	db.createReadStream(function(stream){
+		stream.on( 'data', function ( data ) {
+			console.log( data.key, '=', data.value )
+		} )
+		stream.on( 'error', function ( err ) {
+			console.log( 'Oh my!', err )
+		} )
+		stream.on( 'close', function () {
+			console.log( 'Stream closed' )
+		} )
+		stream.on( 'end', function () {
+			console.log( 'Stream closed' )
+		} );
+	})
 	var petName = req.params.pet_name
 	var petType = req.params.pet_type
 	var petItem = new Pet( petName, petType )
@@ -87,6 +102,7 @@ app.get( '/all_pets', function ( req, res ) {
 } )
 
 app.get( '/read/:pet_name', function ( req, res ) {
+
 
 	var petQuery = req.params.pet_name
 	console.log( "requested " + petQuery );
