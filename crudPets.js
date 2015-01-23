@@ -5,14 +5,10 @@ var fs = require( 'fs' );
 var file = "all_pets.JSON"
 
 var petfile = fs.readFileSync( file, 'utf8' )
-var all_pets = {
 
-	pets: []
+var allPets = JSON.parse(petfile)
 
-};
 
-var pets = JSON.stringify( all_pets.pets )
-console.log( pets );
 
 var none = {
 	status: "A pet by that name does not exist."
@@ -29,47 +25,43 @@ var Pet = function ( name, type ) {
 
 app.get( '/', function ( req, res ) {
 	res.json( {
-		welcome: "Welcome to the petDB "
+		welcome: "Welcome to the petDB. "
 	} );
+	console.log( allPets );
 } );
 
 app.get( '/create/:pet_name/:pet_type', function ( req, res ) {
 	var petItem = new Pet( req.params.pet_name, req.params.pet_type )
 
-	all_pets.pets.push( petItem );
-	console.log( all_pets );
-	fs.writeFile( file, pets, function () {} )
+	allPets.push( petItem );
+	console.log( allPets );
+	fs.writeFile( file, JSON.stringify( allPets ), function () {} )
 	res.json(
 		success
 	);
 
-} )
+} );
 
 app.get( '/all_pets', function ( req, res ) {
 
 	console.log( "requested all pets" );
 
 	res.json( {
-		results: all_pets
-
+		results: allPets
 	} );
 
-} )
+} );
 
 app.get( '/read/:pet_name', function ( req, res ) {
 
 	var petQuery = req.params.pet_name
 	console.log( "requested " + petQuery );
-	for ( var i = 0; i < all_pets.pets.length; i++ ) {
-		if ( petQuery === all_pets.pets[ i ].name ) {
+	for ( var i = 0; i < allPets.length; i++ ) {
+		if ( petQuery === allPets[ i ].name ) {
 
 			res.json( {
-				results: all_pets.pets[ i ]
-			} )
-		}
-		else {
-			res.json( none );
-
+				results: allPets[ i ]
+			} );
 		}
 
 	}
@@ -80,12 +72,10 @@ app.get( '/update/:pet_name/:new_pet_name', function ( req, res ) {
 	var petQuery = req.params.pet_name
 	var newName = req.params.new_pet_name
 	console.log( "changing name of " + petQuery );
-	for ( var i = 0; i < all_pets.pets.length; i++ ) {
-		if ( petQuery === all_pets.pets[ i ].name ) {
-			all_pets.pets[ i ].name = newName
-			res.json( {
-				status: all_pets.pets[ i ]
-			} )
+	for ( var i = 0; i < allPets.length; i++ ) {
+		if ( petQuery === allPets[ i ].name ) {
+			allPets[ i ].name = newName
+			res.json( success )
 		}
 		else {
 			res.json( none );
@@ -97,20 +87,23 @@ app.get( '/update/:pet_name/:new_pet_name', function ( req, res ) {
 
 app.get( '/destroy/:pet_name', function ( req, res ) {
 
-	var petQuery = req.params.pet_name
-	console.log( "destroying " + petQuery );
-	for ( var i = 0; i < all_pets.pets.length; i++ ) {
-		if ( petQuery === all_pets.pets[ i ].name ) {
-			all_pets.pets.splice(i, 1)
-			res.json( success )
-		}
-		else {
-			res.json( none );
+		var petQuery = req.params.pet_name
+		console.log( "destroying " + petQuery );
 
-		}
+		allPets.forEach( function ( pet ) {
+			if ( pet.name === petQuery ) {
+				allPets.splice( indexOf( pet ), 1 )
+				res.json( success )
+				console.log(allPets);
+			}
+		} )
+
+		res.json( none );
 
 	}
-} )
+
+
+ )
 
 app.listen( 3000 );
 console.log( "listening on port 3000" );
